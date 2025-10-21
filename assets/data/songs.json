@@ -1,0 +1,143 @@
+[
+  {
+    "id": "s1",
+    "title": "Resham Firiri",
+    "artist": "Traditional",
+    "tags": ["folk", "classic", "nepali"],
+    "key": "G",
+    "capo": 0,
+    "lines": [
+      "[G]Resham firiri resham firiri [C]Udera jaun ki [D]dola ma",
+      "[G]Resham firiri resham firiri [C]Udera jaun ki [D]dola ma",
+      "[C]Hera na maja [G]kailash ko tala [Am]Resham firiri [D]dola ma"
+    ]
+  },
+  {
+    "id": "s2",
+    "title": "Sa Karnali",
+    "artist": "Nepathya",
+    "tags": ["band", "modern", "nepali"],
+    "key": "C",
+    "capo": 0,
+    "lines": [
+      "[C]Sa Karnali rangini [F]bhayo [G]",
+      "[C]Gham lagyo ujyalini [F]bhayo [G]",
+      "[Am]Dil ko yo [F]dhadkan [G]badyo"
+    ]
+  },
+  {
+    "id": "s3",
+    "title": "Yo Mann Ta Mero Nepali Ho",
+    "artist": "1974 AD",
+    "tags": ["rock", "anthem", "nepali"],
+    "key": "D",
+    "capo": 0,
+    "lines": [
+      "[D]Yo mann ta mero [G]Nepali ho",
+      "[D]Yo muttu mero [A]Nepali ho",
+      "[Bm]Yo ragat mero [G]Nepali ho"
+    ]
+  },
+  {
+    "id": "s4",
+    "title": "Kutu Ma Kutu",
+    "artist": "Rajesh Payal Rai",
+    "tags": ["pop", "dance", "nepali"],
+    "key": "Am",
+    "capo": 0,
+    "lines": [
+      "[Am]Kutu ma kutu [G]supari dana",
+      "[F]Chiya ma chiya [E]ilam ko bana"
+    ]
+  },
+  {
+    "id": "s5",
+    "title": "Suna Bhana",
+    "artist": "Raju Lama",
+    "tags": ["pop", "ballad", "nepali"],
+    "key": "G",
+    "capo": 0,
+    "lines": [
+      "[G]Suna bhana timi sanga [Em]kati maya [C]garchu ma [D]",
+      "[G]Jati bhaye sabai [Em]timi lai [C]samarpu [D]chu"
+    ]
+  },
+  {
+    "id": "s6",
+    "title": "Aaudai Jadai",
+    "artist": "Nabin K Bhattarai",
+    "tags": ["pop", "classic", "nepali"],
+    "key": "C",
+    "capo": 0,
+    "lines": [
+      "[C]Aaudai jadai ghar tero bato ma [Am]",
+      "[F]Udi rahane mutu ko chari [G]le"
+    ]
+  },
+  {
+    "id": "s7",
+    "title": "Fauji Bhai",
+    "artist": "Lok Dohori",
+    "tags": ["folk", "dohori", "nepali"],
+    "key": "D",
+    "capo": 0,
+    "lines": [
+      "[D]Fauji bhai lai [G]chithi lekhchu",
+      "[A]Yaad garera [D]mero manle"
+    ]
+  },
+  {
+    "id": "s8",
+    "title": "Rato Rani",
+    "artist": "Albatross",
+    "tags": ["rock", "band", "nepali"],
+    "key": "Em",
+    "capo": 0,
+    "lines": ["[Em]Rato rani phool ko gandha [C]", "[G]Mero mutu ma bascha [D]"]
+  },
+  {
+    "id": "s9",
+    "title": "Mitini",
+    "artist": "Sajjan Raj Vaidya",
+    "tags": ["indie", "modern", "nepali"],
+    "key": "F",
+    "capo": 1,
+    "lines": ["[F]Mitini timro [Bb]mero katha", "[C]Sangai yo jiwan [F]satha"]
+  },
+  {
+    "id": "s10",
+    "title": "Mayalu",
+    "artist": "Sajjan Raj Vaidya",
+    "tags": ["indie", "romance", "nepali"],
+    "key": "E",
+    "capo": 2,
+    "lines": [
+      "[E]Mayalu timilai [A]mukhamai herchu",
+      "[B]Sapana ma pani [E]chitrai parchu"
+    ]
+  },
+  {
+    "id": "s11",
+    "title": "Fulko Aankha Ma",
+    "artist": "Ani Choying Drolma",
+    "tags": ["classic", "spiritual", "nepali"],
+    "key": "C",
+    "capo": 0,
+    "lines": [
+      "[C]Fulko aankha ma [F]fulai sansara",
+      "[G]Dukhai ko samjhana [C]birsera jau"
+    ]
+  },
+  {
+    "id": "s12",
+    "title": "Samjhana Birsana",
+    "artist": "The Axe Band",
+    "tags": ["rock", "classic", "nepali"],
+    "key": "Am",
+    "capo": 0,
+    "lines": [
+      "[Am]Samjhana birsana [G]kati sahyo",
+      "[F]Man bhitra dukha [E]luki rahyo"
+    ]
+  }
+]
