@@ -5,16 +5,27 @@ import {
 import { SearchBar } from "@/components/search-bar";
 import { SongList } from "@/components/song-list";
 import { UiText } from "@/components/ui/Text";
-import { getSongs } from "@/lib/data/songs";
+import { getAllSongs } from "@/lib/data/all-songs";
 import { useFavorites } from "@/lib/storage/favorites";
+import type { Song } from "@/types/song";
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SongsScreen() {
   const router = useRouter();
-  const songs = getSongs();
+  const [songs, setSongs] = useState<Song[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const all = await getAllSongs();
+      if (mounted) setSongs(all);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const [mode, setMode] = useState<"all" | "artists">("all");
   const [term, setTerm] = useState("");
   const fav = useFavorites();
@@ -31,7 +42,7 @@ export default function SongsScreen() {
   }, [songs, term]);
 
   const artistGroups: ArtistGroup[] = useMemo(() => {
-    const map = new Map<string, typeof songs>();
+    const map = new Map<string, Song[]>();
     for (const s of songs) {
       const arr = map.get(s.artist) ?? [];
       arr.push(s);

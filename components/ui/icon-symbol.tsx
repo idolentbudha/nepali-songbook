@@ -19,6 +19,7 @@ type IconSymbolName = keyof typeof MAPPING;
 const MAPPING = {
   "house.fill": "home",
   "paperplane.fill": "send",
+  "music.note.list": "library-music",
   "chevron.left.forwardslash.chevron.right": "code",
   "chevron.right": "chevron-right",
   // Common app icons
@@ -26,6 +27,7 @@ const MAPPING = {
   "heart.fill": "favorite",
   magnifyingglass: "search",
   "line.3.horizontal.decrease.circle": "tune",
+  "square.and.pencil": "edit",
 } as IconMapping;
 
 /**

@@ -1,14 +1,25 @@
 import { SongList } from "@/components/song-list";
 import { UiText } from "@/components/ui/Text";
-import { getSongs } from "@/lib/data/songs";
+import { getAllSongs } from "@/lib/data/all-songs";
 import { useFavorites } from "@/lib/storage/favorites";
-import React, { useMemo } from "react";
+import type { Song } from "@/types/song";
+import React, { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FavoritesScreen() {
   const fav = useFavorites();
-  const songs = getSongs();
+  const [songs, setSongs] = useState<Song[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const all = await getAllSongs();
+      if (mounted) setSongs(all);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const favorites = useMemo(
     () => songs.filter((s) => fav.ids.includes(s.id)),
     [songs, fav.ids]
