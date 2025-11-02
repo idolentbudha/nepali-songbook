@@ -78,6 +78,32 @@ npm install -g expo-cli
 
 # # Welcome to your Expo app 👋
 
+## 🔧 Environment
+
+We use Expo public environment variables for feature flags. Copy `.env.example` to `.env` and edit as needed.
+
+```bash
+cp .env.example .env
+```
+
+Available flags:
+
+- `EXPO_PUBLIC_SEARCH_ONLINE` (default: `false`)
+	- Enables the client-only stub screen at route `/search-online`.
+	- When `false`, the screen shows a gated message.
+	- When `true`, you can type a query and see mock results from the stub.
+
+- `EXPO_PUBLIC_GOOGLE_CSE_KEY` and `EXPO_PUBLIC_GOOGLE_CSE_CX`
+	- If both are set, the app will use Google Custom Search to fetch results.
+	- Results are limited to one per site by querying each site separately.
+	- For production, prefer calling CSE from a server to avoid exposing keys.
+
+- `EXPO_PUBLIC_SEARCH_SITES`
+	- Comma-separated list of domains to search (e.g., `example.com,foo.org,bar.net`).
+	- The app queries each site and returns at most one result per site.
+
+Note: Only `EXPO_PUBLIC_*` variables are automatically injected into the app bundle by Expo.
+
 # This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
 # ## Get started

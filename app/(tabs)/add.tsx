@@ -3,15 +3,17 @@ import { Stack } from "@/components/ui/Stack";
 import { UiText } from "@/components/ui/Text";
 import { Radius, Typography } from "@/constants/tokens";
 import { useThemeColor } from "@/hooks/use-theme-color";
+import { clearImportDraft, getImportDraft } from "@/lib/storage/import-draft";
 import { addUserSong, makeUserSongId } from "@/lib/storage/user-songs";
 import type { Song } from "@/types/song";
-import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, ScrollView, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AddSongScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ draft?: string }>();
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [keyText, setKeyText] = useState("");
@@ -19,6 +21,27 @@ export default function AddSongScreen() {
   const [tagsText, setTagsText] = useState("");
   const [linesText, setLinesText] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Prefill from import draft if present
+  const prefilledRef = useRef(false);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (params?.draft && !prefilledRef.current) {
+        const draft = await getImportDraft();
+        if (mounted && draft) {
+          if (!title) setTitle(draft.title);
+          if (!artist) setArtist(draft.artist);
+          if (!linesText) setLinesText(draft.lines.join("\n"));
+          await clearImportDraft();
+          prefilledRef.current = true;
+        }
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [params?.draft, title, artist, linesText]);
 
   const valid = useMemo(() => {
     return (
