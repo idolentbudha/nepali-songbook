@@ -2,6 +2,50 @@
 
 A simple, cross-platform mobile application built with **Expo and React Native** to help musicians quickly access and organize song lyrics with chords.
 
+## 📈 User-Assisted Data Augmentation (Smart Cache)
+
+This app can grow its library on-demand via a "user-assisted smart cache" model. When a user searches for a song that isn’t in the local database, the app can consult approved online sources, let the user pick a result, show a preview, and (if licensed) import it into the shared catalog, or otherwise store it locally on-device only.
+
+Below are the key challenges we agree to track, with recommended mitigations. We’ll use the checklist to mark progress over time.
+
+### I. Technical & Anti-Scraping Challenges (Backend)
+
+| #   | Challenge                        | Description & Impact                                                           | Mitigation Strategy                                                                                  |
+| --- | -------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| 1   | Dynamic Content & JavaScript     | Many sites render lyrics/chords client-side; raw HTML may not contain content. | Use a headless browser (Playwright/Puppeteer) to fully render before extraction.                     |
+| 2   | Anti-Bot Detection (IP Blocking) | Repeated requests from one IP get flagged; bans possible.                      | Use a reputable rotating proxy; randomize fingerprints; respect robots/ToS and rate limits.          |
+| 3   | Website Structure Changes        | Minor DOM/CSS changes break brittle scrapers.                                  | Build resilient adapters with multiple selectors, change detection, and automated health checks.     |
+| 4   | Rate Limiting & CAPTCHAs         | Throttling and CAPTCHAs can block scrapes.                                     | Exponential backoff, graceful failure, surface “Source unavailable” to user; avoid CAPTCHA-breaking. |
+
+### II. Data & Operational Challenges (Quality & Standardization)
+
+| #   | Challenge                           | Description & Impact                                      | Mitigation Strategy                                                                              |
+| --- | ----------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 5   | Data Inconsistency (Chord Notation) | Variations like Am7 vs “A minor 7”; inconsistent formats. | Standardization pipeline: map/normalize to a canonical chord set; reject/flag unparseable input. |
+| 6   | Chord/Lyric Alignment               | White-space and format differences break alignment.       | User confirmation/edit screen; or quick admin pass on first lines before publishing.             |
+| 7   | Duplicate Entries                   | Variants like “Song (Live)” vs “Song”.                    | Fuzzy matching (e.g., Levenshtein) to warn/merge before triggering expensive scrape.             |
+| 8   | Moderation Overhead                 | Many user imports need review.                            | UNVERIFIED/VERIFIED flags; show only VERIFIED broadly; schedule weekly moderation.               |
+
+### III. Legal & Intellectual Property Challenges (Highest Risk)
+
+| #   | Challenge                        | Description & Impact                                                          | Mitigation Strategy                                                                                                            |
+| --- | -------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 9   | Copyright Infringement (Lyrics)  | Lyrics are copyrighted; storing/distributing without license risks liability. | Prefer chords-only or user-owned content for shared catalog; obtain licenses if storing lyrics server-side; get legal counsel. |
+| 10  | Terms of Service (ToS) Violation | Most sites forbid scraping; backend can violate ToS even if user-triggered.   | Use only public, permitted sources; whitelist/licensing; exclude hostile sources; respect robots/ToS.                          |
+
+### ✅ Tracking Checklist
+
+- [ ] Design headless rendering adapter (Playwright) with timeouts and size limits.
+- [ ] Add rotating proxy integration and request fingerprint randomization.
+- [ ] Implement adapter health checks and change alerts per source.
+- [ ] Add exponential backoff and user-facing “Source unavailable” messaging.
+- [ ] Build chord normalization pipeline (map to canonical notation; tests).
+- [ ] Implement alignment review UI in import preview (user/admin).
+- [ ] Add fuzzy duplicate detection before scrape (title/artist/lines hash).
+- [ ] Introduce moderation workflow (UNVERIFIED → VERIFIED).
+- [ ] Define legal posture: chords-only vs licensed lyrics; obtain counsel and, if needed, licensing.
+- [ ] Maintain a whitelist of permitted sources and enforce ToS/robots compliance.
+
 ## 🌟 Phase 1 Core Features (MVP)
 
 The primary goal of this initial phase is to establish the core song display and personal organization features:
