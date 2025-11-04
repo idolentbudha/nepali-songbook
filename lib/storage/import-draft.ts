@@ -5,6 +5,10 @@ const KEY = "@import_draft";
 export type ImportDraft = {
   title: string;
   artist: string;
+  /** Optional album name if detected */
+  album?: string;
+  /** Optional chord key/tonality if detected */
+  key?: string;
   lines: string[];
   sourceUrl: string;
 };

@@ -2,6 +2,10 @@ export type ImportResult = {
   draft?: {
     title: string;
     artist: string;
+    /** Optional album name if detected */
+    album?: string;
+    /** Optional chord key/tonality if detected (e.g., "C", "Gm") */
+    key?: string;
     lines: string[];
     sourceUrl: string;
   };
@@ -14,6 +18,15 @@ export async function importFromUrl(url: string): Promise<ImportResult> {
     if (!res.ok) return { error: `Fetch failed: ${res.status}` };
     const html = await res.text();
     const site = hostnameFromUrl(url);
+
+    // Site-specific extractor: ultimate-guitar.com (best-effort)
+    if (
+      /ultimate-guitar\.com$/i.test(site) ||
+      /ultimate-guitar\.com/i.test(url)
+    ) {
+      const draft = extractFromUltimateGuitar(html, url);
+      if (draft) return { draft };
+    }
 
     // Site-specific extractor: e-chords.com (best-effort)
     if (/e-chords\.com$/i.test(site) || /e-chords\.com/i.test(url)) {
@@ -31,6 +44,230 @@ export async function importFromUrl(url: string): Promise<ImportResult> {
   }
 }
 
+function extractFromUltimateGuitar(
+  html: string,
+  sourceUrl: string
+): ImportResult["draft"] | undefined {
+  // Title via og:title or <title>, then custom split for UG format
+  const titleRaw =
+    matchMetaContent(
+      html,
+      /<meta\s+property=["']og:title["']\s+content=["']([^"']+)/i
+    ) || matchTitle(html);
+  const { title, artist } = splitUGTitleArtist(titleRaw);
+
+  // Try to enrich with key/album from Next.js data
+  const ugMeta = extractUGMetaFields(html);
+  const keyGuess = ugMeta.key;
+  const albumGuess = ugMeta.album;
+  const artistFinal = ugMeta.artist || artist;
+  const titleFinal = ugMeta.title || title;
+
+  // Attempt 1: parse embedded Next.js data and scan for [ch] markup
+  const nextText = extractUGNextDataText(html);
+  if (nextText) {
+    const text = normalizeUGMarkup(nextText);
+    let lines = sanitizeLines(text);
+    // Text likely already inline [C]style after normalization
+    lines = postProcessLines(lines);
+    if (lines.length)
+      return {
+        title: titleFinal,
+        artist: artistFinal,
+        album: albumGuess,
+        key: keyGuess,
+        lines,
+        sourceUrl,
+      };
+  }
+
+  // Attempt 2: if HTML contains [ch]...[/ch] directly, extract visible content
+  const inlineCandidate = extractUGInlineFromHtml(html);
+  if (inlineCandidate) {
+    const text = normalizeUGMarkup(inlineCandidate);
+    let lines = sanitizeLines(text);
+    lines = postProcessLines(lines);
+    if (lines.length)
+      return {
+        title: titleFinal,
+        artist: artistFinal,
+        album: albumGuess,
+        key: keyGuess,
+        lines,
+        sourceUrl,
+      };
+  }
+
+  // Attempt 3: fall back to any <pre> blocks (rare on UG)
+  const blocks = extractPreBlocks(html);
+  const chosen = pickBestBlock(blocks);
+  if (chosen) {
+    const text = htmlToText(chosen);
+    let lines = sanitizeLines(text);
+    lines = postProcessLines(lines);
+    if (lines.length)
+      return {
+        title: titleFinal,
+        artist: artistFinal,
+        album: albumGuess,
+        key: keyGuess,
+        lines,
+        sourceUrl,
+      };
+  }
+
+  return undefined;
+}
+
+function splitUGTitleArtist(s?: string): { title: string; artist: string } {
+  if (!s) return { title: "Untitled", artist: "" };
+  // Common formats: "Song Name CHORDS by Artist @ Ultimate-Guitar.Com"
+  let cleaned = s.replace(/@\s*Ultimate.*$/i, "").trim();
+  // Remove trailing CHORDS / TABS label from title portion
+  const lower = cleaned.toLowerCase();
+  const byIdx = lower.lastIndexOf(" by ");
+  if (byIdx !== -1) {
+    const rawTitle = cleaned.slice(0, byIdx).trim();
+    const artist = cleaned.slice(byIdx + 4).trim();
+    const title = rawTitle.replace(/\s*(?:chords?|tabs?)\s*$/i, "").trim();
+    return { title: title || rawTitle, artist };
+  }
+  // Fallback: remove suffix label and return as title only
+  cleaned = cleaned.replace(/\s*(?:chords?|tabs?)\s*$/i, "").trim();
+  return { title: cleaned, artist: "" };
+}
+
+function extractUGNextDataText(html: string): string | null {
+  const m = html.match(
+    /<script[^>]*id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i
+  );
+  if (!m) return null;
+  try {
+    const json = JSON.parse(m[1]);
+    // Recursively scan for a big string that contains [ch] tags or many chords
+    let found: string | null = null;
+    const visit = (v: any) => {
+      if (found) return;
+      if (typeof v === "string") {
+        if (/\[ch\][^\[]+\[\/ch\]/i.test(v) || chordDensity(v) >= 8) {
+          found = v;
+        }
+        return;
+      }
+      if (Array.isArray(v)) {
+        for (const x of v) visit(x);
+        return;
+      }
+      if (v && typeof v === "object") {
+        for (const k in v) visit(v[k]);
+      }
+    };
+    visit(json);
+    return found;
+  } catch {
+    return null;
+  }
+}
+
+function extractUGMetaFields(html: string): {
+  key?: string;
+  album?: string;
+  artist?: string;
+  title?: string;
+} {
+  const m = html.match(
+    /<script[^>]*id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i
+  );
+  if (!m) return {};
+  try {
+    const json = JSON.parse(m[1]);
+    const wanted: Record<string, string[]> = {
+      key: ["tonality_name", "tonality", "key"],
+      album: ["album_name", "album"],
+      artist: ["artist_name", "artist", "artistName"],
+      title: ["song_name", "song", "title"],
+    };
+    const out: any = {};
+    const visit = (v: any) => {
+      if (!v) return;
+      if (typeof v === "string") return;
+      if (Array.isArray(v)) {
+        for (const x of v) visit(x);
+        return;
+      }
+      if (typeof v === "object") {
+        for (const k in v) {
+          const lower = k.toLowerCase();
+          for (const [field, keys] of Object.entries(wanted)) {
+            if (keys.some((kk) => kk.toLowerCase() === lower)) {
+              const val = v[k];
+              if (typeof val === "string" && !out[field]) out[field] = val;
+            }
+          }
+          visit(v[k]);
+        }
+      }
+    };
+    visit(json);
+    // Basic cleanup for key like "C major" => "C" or "G minor" => "Gm"
+    if (typeof out.key === "string") {
+      const k = out.key.trim();
+      const mm = k.match(/^[A-G](?:#|b)?/);
+      if (mm) {
+        const base = mm[0];
+        const minor = /minor|m\b/i.test(k) && !/major/i.test(k);
+        out.key = minor ? base + "m" : base;
+      }
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+function chordDensity(s: string): number {
+  const m = s.match(/\b[A-G](?:#|b)?m?(?:maj|min|sus|dim|aug)?\d*\b/g);
+  return m ? m.length : 0;
+}
+
+function extractUGInlineFromHtml(html: string): string | null {
+  // If UG rendered inline with [ch] tags in the initial HTML, capture a reasonable slice
+  const m = html.match(/\[ch\][\s\S]*?\[\/ch\][\s\S]*?(?:<\/|$)/i);
+  if (!m) return null;
+  // Remove trailing closing tag edge if present
+  return m[0].replace(/<\/[^>]*>$/i, "");
+}
+
+function normalizeUGMarkup(s: string): string {
+  // Convert UG [ch]X[/ch] tags to our inline [X]
+  let out = s.replace(/\[ch\]([^\[]*?)\[\/ch\]/gi, (m, g1) => {
+    const chord = String(g1 || "").trim();
+    return chord ? `[${chord}]` : "";
+  });
+  // Strip other UG bbcode-like tags (e.g., [tab], [/tab])
+  out = out.replace(
+    /\[(?:\/)?(?:tab|chord|intro|verse|chorus|bridge|solo)\]/gi,
+    ""
+  );
+  // Normalize newlines
+  out = out.replace(/\r\n?/g, "\n");
+  return out;
+}
+
+function extractEChordsKey(html: string): string | undefined {
+  // Look for Key/Tone/Tom labels on the page
+  const m = html.match(
+    /(Key|Tone|Tom)\s*[:\-]\s*([A-G](?:#|b)?(?:m|maj|min|sus|dim|aug)?\d?)/i
+  );
+  if (m) {
+    const guess = m[2].trim();
+    // Validate using chord token pattern (reuse logic loosely)
+    if (/^[A-G](?:#|b)?(?:m|maj|min|sus|dim|aug)?\d?$/.test(guess))
+      return guess;
+  }
+  return undefined;
+}
+
 function extractFromEChords(
   html: string,
   sourceUrl: string
@@ -43,6 +280,9 @@ function extractFromEChords(
     ) || matchTitle(html);
   const { title, artist } = splitTitleArtist(titleRaw);
 
+  // Try to detect a Key/Tone/Tom in the page
+  const keyGuess = extractEChordsKey(html);
+
   // e-chords typically renders the tab/chords inside <pre> blocks
   const blocks = extractPreBlocks(html);
   const chosen = pickBestBlock(blocks);
@@ -51,7 +291,7 @@ function extractFromEChords(
   let lines = sanitizeLines(text);
   lines = postProcessLines(lines);
   if (!lines.length) return undefined;
-  return { title, artist, lines, sourceUrl };
+  return { title, artist, key: keyGuess, lines, sourceUrl };
 }
 
 function extractGeneric(

@@ -32,6 +32,7 @@ export default function AddSongScreen() {
         if (mounted && draft) {
           if (!title) setTitle(draft.title);
           if (!artist) setArtist(draft.artist);
+          if (!keyText && draft.key) setKeyText(draft.key);
           if (!linesText) setLinesText(draft.lines.join("\n"));
           await clearImportDraft();
           prefilledRef.current = true;
@@ -41,7 +42,7 @@ export default function AddSongScreen() {
     return () => {
       mounted = false;
     };
-  }, [params?.draft, title, artist, linesText]);
+  }, [params?.draft, title, artist, keyText, linesText]);
 
   const valid = useMemo(() => {
     return (
