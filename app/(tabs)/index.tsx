@@ -1,233 +1,144 @@
-import { Image } from "expo-image";
-import { Platform, StyleSheet, View } from "react-native";
-
-import { HelloWave } from "@/components/hello-wave";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { SearchBar } from "@/components/search-bar";
 import { Button } from "@/components/ui/Button";
-import { Spacer } from "@/components/ui/layout/spacer";
-import { Stack } from "@/components/ui/layout/stack";
 import { UiText } from "@/components/ui/Text";
-import { Radius, Shadows, Typography } from "@/constants/tokens";
-import { Link, useRouter } from "expo-router";
+import { importFromUrl } from "@/lib/api/import-from-url";
+import { searchOnline, type SearchResult } from "@/lib/api/search-online";
+import { SEARCH_ONLINE_ENABLED } from "@/lib/flags";
+import { setImportDraft } from "@/lib/storage/import-draft";
+import { useRouter } from "expo-router";
+import React, { useMemo, useState } from "react";
+import { Alert, FlatList, Pressable, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function HomeScreen() {
+export default function SearchOnlineScreen() {
   const router = useRouter();
+  const [term, setTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<SearchResult[]>([]);
+
+  const canSearch = useMemo(
+    () => SEARCH_ONLINE_ENABLED && term.trim().length > 1,
+    [term]
+  );
+
+  async function runSearch() {
+    if (!SEARCH_ONLINE_ENABLED) return;
+    const q = term.trim();
+    if (!q) return;
+    setLoading(true);
+    try {
+      const res = await searchOnline(q);
+      setResults(res);
+    } catch (e) {
+      console.warn(e);
+      Alert.alert("Search failed", "This feature is a client stub only.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!SEARCH_ONLINE_ENABLED) {
+    return (
+      <SafeAreaView style={{ flex: 1, padding: 16 }}>
+        <UiText variant="title">Search online</UiText>
+        <View style={{ height: 8 }} />
+        <UiText>
+          This preview screen is gated behind a feature flag and is currently
+          disabled. Set EXPO_PUBLIC_SEARCH_ONLINE=true to enable the client
+          stub.
+        </UiText>
+      </SafeAreaView>
+    );
+  }
+
+  console.log("resuts:", results);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <UiText variant="title">Welcome!</UiText>
-        <HelloWave />
-      </ThemedView>
-      {/* Quick nav to Songs list */}
-      <ThemedView style={styles.stepContainer}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
+        <UiText variant="title">Search online</UiText>
+      </View>
+      <SearchBar
+        value={term}
+        onChange={setTerm}
+        onClear={() => {
+          setTerm("");
+          setResults([]);
+        }}
+        placeholder="Search title or artist…"
+      />
+      <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
         <Button
-          title="Browse Songs"
-          onPress={() => router.push("/songs" as any)}
+          title={loading ? "Searching…" : "Search"}
+          onPress={runSearch}
+          disabled={!canSearch || loading}
+          loading={loading}
         />
-      </ThemedView>
-
-      {/* Button variants demo */}
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Buttons</ThemedText>
-        <Stack direction="row" space={3} align="center">
-          <Button title="Primary" onPress={() => {}} />
-          <Button title="Secondary" variant="secondary" onPress={() => {}} />
-          <Button title="Ghost" variant="ghost" onPress={() => {}} />
-        </Stack>
-        <Spacer size={3} />
-        <Stack direction="row" space={3} align="center">
-          <Button title="Small" size="sm" onPress={() => {}} />
-          <Button title="Medium" size="md" onPress={() => {}} />
-          <Button title="Large" size="lg" onPress={() => {}} />
-        </Stack>
-        <Spacer size={3} />
-        <Stack direction="row" space={3} align="center">
-          <Button title="Loading" loading onPress={() => {}} />
-          <Button title="Disabled" disabled onPress={() => {}} />
-        </Stack>
-      </ThemedView>
-      {/* UiText variants demo */}
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Text variants</ThemedText>
-        <Stack space={2}>
-          <UiText variant="title">Title text</UiText>
-          <UiText variant="subtitle">Subtitle text</UiText>
-          <UiText variant="body">Body text</UiText>
-          <UiText variant="bodySemiBold">Body SemiBold</UiText>
-          <UiText variant="caption">Caption text</UiText>
-          <UiText variant="overline">Overline text</UiText>
-          <UiText variant="link">Link text</UiText>
-        </Stack>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <UiText variant="subtitle">Step 1: Try it</UiText>
-        <UiText>
-          Edit{" "}
-          <UiText variant="body" weight="semibold">
-            app/(tabs)/index.tsx
-          </UiText>{" "}
-          to see changes. Press {""}
-          <UiText variant="body" weight="semibold">
-            {Platform.select({
-              ios: "cmd + d",
-              android: "cmd + m",
-              web: "F12",
-            })}
-          </UiText>{" "}
-          to open developer tools.
-        </UiText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <UiText variant="subtitle">Step 2: Explore</UiText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction
-              title="Action"
-              icon="cube"
-              onPress={() => alert("Action pressed")}
-            />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert("Share pressed")}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert("Delete pressed")}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <UiText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </UiText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <UiText variant="subtitle">Step 3: Get a fresh start</UiText>
-        <UiText>
-          {`When you're ready, run `}
-          <UiText variant="body" weight="semibold">
-            npm run reset-project
-          </UiText>{" "}
-          to get a fresh{" "}
-          <UiText variant="body" weight="semibold">
-            app
-          </UiText>{" "}
-          directory. This will move the current {""}
-          <UiText variant="body" weight="semibold">
-            app
-          </UiText>{" "}
-          to {""}
-          <UiText variant="body" weight="semibold">
-            app-example
+      </View>
+      <FlatList
+        data={results}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ padding: 16, paddingTop: 8 }}
+        ListEmptyComponent={() => (
+          <UiText>
+            {term.trim().length > 1
+              ? "No results found in stubbed sources."
+              : "Enter at least 2 characters to search."}
           </UiText>
-          .
-        </UiText>
-      </ThemedView>
-
-      {/* Design tokens + layout helpers demo */}
-      <ThemedView style={styles.stepContainer}>
-        <UiText variant="subtitle">Design system demo</UiText>
-        <UiText>
-          Using{" "}
-          <UiText variant="body" weight="semibold">
-            Stack
-          </UiText>{" "}
-          and {""}
-          <UiText variant="body" weight="semibold">
-            Spacer
-          </UiText>{" "}
-          with tokens from {""}
-          <UiText variant="body" weight="semibold">
-            constants/tokens.ts
-          </UiText>
-          .
-        </UiText>
-
-        <Stack space={4}>
-          <UiText style={{ fontSize: Typography.sizes.lg }}>
-            Vertical stack (space=4)
-          </UiText>
-          <Stack direction="row" space={2} align="center">
-            <View
-              style={[styles.box, Shadows.sm, { backgroundColor: "#e5e7eb" }]}
-            />
-            <View
-              style={[styles.box, Shadows.sm, { backgroundColor: "#cbd5e1" }]}
-            />
-            <View
-              style={[styles.box, Shadows.sm, { backgroundColor: "#94a3b8" }]}
-            />
-          </Stack>
-          <UiText>Divider + horizontal spacing</UiText>
-          <Stack
-            direction="row"
-            space={2}
-            align="center"
-            divider={
-              <View
-                style={{ width: 1, height: 24, backgroundColor: "#e5e7eb" }}
-              />
-            }
-          >
-            <UiText>Chord</UiText>
-            <UiText>Lyrics</UiText>
-            <UiText>Capo</UiText>
-          </Stack>
-          <UiText>Manual Spacer usage</UiText>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={[styles.dot, { backgroundColor: "#0ea5e9" }]} />
-            <Spacer axis="horizontal" size={2} />
-            <UiText>Token gap</UiText>
-          </View>
-        </Stack>
-      </ThemedView>
-    </ParallaxScrollView>
+        )}
+        renderItem={({ item }) => (
+          <ResultRow
+            result={item}
+            onChoose={async () => {
+              try {
+                setLoading(true);
+                const r = await importFromUrl(item.source.url);
+                if (r.error || !r.draft) {
+                  Alert.alert(
+                    "Import failed",
+                    r.error || "Unable to extract content from this page."
+                  );
+                } else {
+                  await setImportDraft(r.draft);
+                  router.push("/(tabs)/add?draft=1" as any);
+                }
+              } catch (e) {
+                console.warn(e);
+                Alert.alert(
+                  "Import error",
+                  "Something went wrong while importing."
+                );
+              } finally {
+                setLoading(false);
+              }
+            }}
+          />
+        )}
+      />
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  box: {
-    width: 48,
-    height: 48,
-    borderRadius: Radius.md,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-});
+function ResultRow({
+  result,
+  onChoose,
+}: {
+  result: SearchResult;
+  onChoose: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onChoose}
+      style={{
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#e5e7eb",
+      }}
+      accessibilityRole="button"
+    >
+      <UiText>{result.title}</UiText>
+      <UiText variant="caption">{result.source.site}</UiText>
+      {/* <UiText variant="caption">{result.source.url}</UiText> */}
+    </Pressable>
+  );
+}
