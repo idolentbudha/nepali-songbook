@@ -1,17 +1,16 @@
 import { Spacing } from "@/constants/tokens";
 import React, { Fragment, ReactNode } from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
-import { spaceStyle, type SpaceProps } from "./space";
-import { Spacer } from "./Spacer";
+import { Spacer, spaceStyle, type SpaceProps } from ".";
 
 export type StackProps = {
-  children?: ReactNode;
+  children?: React.ReactNode;
   direction?: "row" | "column";
   space?: keyof typeof Spacing | number;
   align?: ViewStyle["alignItems"];
   justify?: ViewStyle["justifyContent"];
   wrap?: ViewStyle["flexWrap"];
-  divider?: ReactNode;
+  divider?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   /** Optional test id for e2e */
   testID?: string;
@@ -69,3 +68,5 @@ export function Stack({
     </View>
   );
 }
+
+export default Stack;

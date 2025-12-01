@@ -1,5 +1,5 @@
 import { useSongRender } from "@/components/song-render/context";
-import { Spacer } from "@/components/ui/Spacer";
+import { Spacer } from "@/components/ui/layout/spacer";
 import { UiText } from "@/components/ui/Text";
 import { Radius, Spacing } from "@/constants/tokens";
 import { useThemeColor } from "@/hooks/use-theme-color";

@@ -1,5 +1,5 @@
 import { Collapsible } from "@/components/ui/collapsible";
-import { Spacer } from "@/components/ui/Spacer";
+import { Spacer } from "@/components/ui/layout/spacer";
 import { UiText } from "@/components/ui/Text";
 import { Radius } from "@/constants/tokens";
 import type { Song } from "@/types/song";

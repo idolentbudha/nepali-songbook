@@ -1,4 +1,4 @@
-import { Spacer } from "@/components/ui/Spacer";
+import { Spacer } from "@/components/ui/layout/spacer";
 import { UiText } from "@/components/ui/Text";
 import { Radius } from "@/constants/tokens";
 import React from "react";

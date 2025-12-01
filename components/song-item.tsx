@@ -1,7 +1,7 @@
-import { Spacer } from "@/components/ui/Spacer";
-import { Stack } from "@/components/ui/Stack";
-import { UiText } from "@/components/ui/Text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { Spacer } from "@/components/ui/layout/spacer";
+import { Stack } from "@/components/ui/layout/stack";
+import { UiText } from "@/components/ui/Text";
 import { Radius } from "@/constants/tokens";
 import type { Song } from "@/types/song";
 import React from "react";

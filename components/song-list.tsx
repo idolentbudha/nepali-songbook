@@ -1,5 +1,5 @@
 import { SongItem } from "@/components/song-item";
-import { Spacer } from "@/components/ui/Spacer";
+import { Spacer } from "@/components/ui/layout/spacer";
 import { UiText } from "@/components/ui/Text";
 import type { Song } from "@/types/song";
 import React from "react";

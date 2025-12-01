@@ -73,3 +73,99 @@ export const Shadows = {
     elevation: 8,
   },
 } as const;
+
+// Unified color tokens: palette + semantic (light/dark) in one object.
+export const ColorTokens = {
+  // Palette ramps
+  gray: {
+    50: "#F9FAFB",
+    100: "#F3F4F6",
+    200: "#E5E7EB",
+    300: "#D1D5DB",
+    400: "#9CA3AF",
+    500: "#6B7280",
+    600: "#4B5563",
+    700: "#374151",
+    800: "#1F2937",
+    900: "#111827",
+  },
+  brand: {
+    primary: "#0a7ea4",
+    secondary: "#13658b",
+  },
+  feedback: {
+    success: "#16A34A",
+    warning: "#D97706",
+    danger: "#DC2626",
+    info: "#2563EB",
+  },
+  // Base semantic surfaces (non-mode-specific)
+  base: {
+    surface: "#FFFFFF",
+    surfaceAlt: "#F3F4F6",
+    surfaceDark: "#151718",
+    border: "#E5E7EB",
+    borderDark: "#2A2F33",
+    overlay: "rgba(0,0,0,0.4)",
+  },
+  // Mode-specific semantic intentions
+  light: {
+    primary: "#0a7ea4",
+    primaryForeground: "#FFFFFF",
+    secondary: "#13658b",
+    secondaryForeground: "#FFFFFF",
+    accent: "#FFB300",
+    accentForeground: "#1F2937",
+    success: "#16A34A",
+    danger: "#DC2626",
+    warning: "#D97706",
+    info: "#2563EB",
+    background: "#FFFFFF",
+    backgroundAlt: "#F9FAFB",
+    surface: "#FFFFFF",
+    surfaceAlt: "#F3F4F6",
+    surfaceElevated: "#FFFFFF",
+    border: "#E5E7EB",
+    borderStrong: "#D1D5DB",
+    text: "#11181C",
+    textMuted: "#6B7280",
+    overlay: "rgba(0,0,0,0.4)",
+  },
+  dark: {
+    primary: "#ffffff",
+    primaryForeground: "#000000",
+    secondary: "#0a7ea4",
+    secondaryForeground: "#FFFFFF",
+    accent: "#F59E0B",
+    accentForeground: "#000000",
+    success: "#22C55E",
+    danger: "#EF4444",
+    warning: "#F59E0B",
+    info: "#3B82F6",
+    background: "#151718",
+    backgroundAlt: "#1F2325",
+    surface: "#1F2325",
+    surfaceAlt: "#24282B",
+    surfaceElevated: "#2A2F33",
+    border: "#2A2F33",
+    borderStrong: "#374151",
+    text: "#ECEDEE",
+    textMuted: "#9CA3AF",
+    overlay: "rgba(0,0,0,0.55)",
+  },
+} as const;
+
+// Backwards-compatible aliases (if any code still imports Color / SemanticColor)
+export const Color = ColorTokens; // palette + semantic combined
+export const SemanticColor = {
+  light: ColorTokens.light,
+  dark: ColorTokens.dark,
+} as const;
+
+// Types
+export type ColorTokensType = typeof ColorTokens;
+export type SemanticColorTokens = typeof ColorTokens.light;
+export type ColorRamp = typeof ColorTokens.gray;
+export type BrandColors = typeof ColorTokens.brand;
+export type FeedbackColors = typeof ColorTokens.feedback;
+export type BaseSemanticColors = typeof ColorTokens.base;

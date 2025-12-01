@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { Stack } from "@/components/ui/Stack";
+import { Stack } from "@/components/ui/layout/stack";
 import { UiText } from "@/components/ui/Text";
 import { Radius, Typography } from "@/constants/tokens";
 import { useThemeColor } from "@/hooks/use-theme-color";

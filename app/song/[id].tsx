@@ -1,7 +1,7 @@
 import { SongRenderProvider } from "@/components/song-render/context";
 import { SongRenderControls } from "@/components/song-render/controls";
 import { SongView } from "@/components/song-view";
-import { Spacer } from "@/components/ui/Spacer";
+import { Spacer } from "@/components/ui/layout";
 import { UiText } from "@/components/ui/Text";
 import { findAnySongById } from "@/lib/data/all-songs";
 import { useLocalSearchParams } from "expo-router";
