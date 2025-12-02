@@ -1,3 +1,4 @@
+import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/Button";
 import { Stack } from "@/components/ui/layout/stack";
 import { UiText } from "@/components/ui/Text";
@@ -45,11 +46,7 @@ export default function AddSongScreen() {
   }, [params?.draft, title, artist, keyText, linesText]);
 
   const valid = useMemo(() => {
-    return (
-      title.trim().length > 0 &&
-      artist.trim().length > 0 &&
-      linesText.trim().length > 0
-    );
+    return title.trim().length > 0 && artist.trim().length > 0 && linesText.trim().length > 0;
   }, [title, artist, linesText]);
 
   const bg = useThemeColor({}, "background");
@@ -63,9 +60,9 @@ export default function AddSongScreen() {
       const id = makeUserSongId();
       const tags = tagsText
         .split(",")
-        .map((t) => t.trim())
+        .map(t => t.trim())
         .filter(Boolean);
-      const lines = linesText.split(/\r?\n/).map((l) => l.replace(/\s+$/g, ""));
+      const lines = linesText.split(/\r?\n/).map(l => l.replace(/\s+$/g, ""));
       const capo = capoText.trim() ? parseInt(capoText.trim(), 10) : undefined;
       const song: Song = {
         id,
@@ -101,86 +98,80 @@ export default function AddSongScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView
-        contentContainerStyle={{ padding: 16 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <UiText variant="title">Add Song</UiText>
-        <View style={{ height: 12 }} />
-        <Field label="Title">
-          <TextInput
-            placeholder="Eg. Hey Jude"
-            value={title}
-            onChangeText={setTitle}
-            style={inputStyle(bg as string, border as string, text as string)}
-            placeholderTextColor={border as string}
-          />
-        </Field>
-        <Field label="Artist">
-          <TextInput
-            placeholder="Eg. The Beatles"
-            value={artist}
-            onChangeText={setArtist}
-            style={inputStyle(bg as string, border as string, text as string)}
-            placeholderTextColor={border as string}
-          />
-        </Field>
-        <Stack direction="row" space={2}>
-          <Field label="Key" style={{ flex: 1 }}>
+    <ThemedView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
+          <UiText variant="title">Add Song</UiText>
+          <View style={{ height: 12 }} />
+          <Field label="Title">
             <TextInput
-              placeholder="Eg. C or Gm"
-              value={keyText}
-              onChangeText={setKeyText}
-              autoCapitalize="characters"
+              placeholder="Eg. Hey Jude"
+              value={title}
+              onChangeText={setTitle}
               style={inputStyle(bg as string, border as string, text as string)}
               placeholderTextColor={border as string}
             />
           </Field>
-          <Field label="Capo" style={{ width: 100 }}>
+          <Field label="Artist">
             <TextInput
-              placeholder="0"
-              value={capoText}
-              onChangeText={setCapoText}
-              keyboardType="number-pad"
+              placeholder="Eg. The Beatles"
+              value={artist}
+              onChangeText={setArtist}
               style={inputStyle(bg as string, border as string, text as string)}
               placeholderTextColor={border as string}
             />
           </Field>
-        </Stack>
-        <Field label="Tags (comma separated)">
-          <TextInput
-            placeholder="worship, easy, nepali"
-            value={tagsText}
-            onChangeText={setTagsText}
-            style={inputStyle(bg as string, border as string, text as string)}
-            placeholderTextColor={border as string}
-          />
-        </Field>
-        <Field label="Lyrics + Chords">
-          <TextInput
-            placeholder={`Type lines here. Use chord markup like [C]Hello [G]world\nOne line per row.`}
-            value={linesText}
-            onChangeText={setLinesText}
-            multiline
-            numberOfLines={10}
-            textAlignVertical="top"
-            style={[
-              inputStyle(bg as string, border as string, text as string),
-              { minHeight: 160 },
-            ]}
-            placeholderTextColor={border as string}
-          />
-        </Field>
-        <View style={{ height: 12 }} />
-        <Button
-          title="Save"
-          onPress={onSave}
-          disabled={!valid || saving}
-          loading={saving}
-        />
-      </ScrollView>
-    </SafeAreaView>
+          <Stack direction="row" space={2}>
+            <Field label="Key" style={{ flex: 1 }}>
+              <TextInput
+                placeholder="Eg. C or Gm"
+                value={keyText}
+                onChangeText={setKeyText}
+                autoCapitalize="characters"
+                style={inputStyle(bg as string, border as string, text as string)}
+                placeholderTextColor={border as string}
+              />
+            </Field>
+            <Field label="Capo" style={{ width: 100 }}>
+              <TextInput
+                placeholder="0"
+                value={capoText}
+                onChangeText={setCapoText}
+                keyboardType="number-pad"
+                style={inputStyle(bg as string, border as string, text as string)}
+                placeholderTextColor={border as string}
+              />
+            </Field>
+          </Stack>
+          <Field label="Tags (comma separated)">
+            <TextInput
+              placeholder="worship, easy, nepali"
+              value={tagsText}
+              onChangeText={setTagsText}
+              style={inputStyle(bg as string, border as string, text as string)}
+              placeholderTextColor={border as string}
+            />
+          </Field>
+          <Field label="Lyrics + Chords">
+            <TextInput
+              placeholder={`Type lines here. Use chord markup like [C]Hello [G]world\nOne line per row.`}
+              value={linesText}
+              onChangeText={setLinesText}
+              multiline
+              numberOfLines={10}
+              textAlignVertical="top"
+              style={[
+                inputStyle(bg as string, border as string, text as string),
+                { minHeight: 160 },
+              ]}
+              placeholderTextColor={border as string}
+            />
+          </Field>
+          <View style={{ height: 12 }} />
+          <Button title="Save" onPress={onSave} disabled={!valid || saving} loading={saving} />
+        </ScrollView>
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
