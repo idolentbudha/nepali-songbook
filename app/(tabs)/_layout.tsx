@@ -21,6 +21,14 @@ export default function TabLayout() {
           }}
         />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="db">
+        <Icon
+          sf={{
+            default: "list.bullet.rectangle",
+            selected: "list.bullet.rectangle",
+          }}
+        />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
   // return (

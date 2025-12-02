@@ -1,156 +1,115 @@
-# Digital SongBook App (Phase 1 MVP)
+# 🎸 Digital Songbook App
 
-A simple, cross-platform mobile application built with **Expo and React Native** to help musicians quickly access and organize song lyrics with chords.
+A cross-platform (iOS & Android) offline-first utility for musicians to store, organize, and view personal song lyrics and chords. Designed as a distraction-free, private digital notebook — a modern alternative to paper binders.
 
-## 📈 User-Assisted Data Augmentation (Smart Cache)
+---
 
-This app can grow its library on-demand via a "user-assisted smart cache" model. When a user searches for a song that isn’t in the local database, the app can consult approved online sources, let the user pick a result, show a preview, and (if licensed) import it into the shared catalog, or otherwise store it locally on-device only.
+## 📝 Project Overview — Phase 1 MVP
 
-Below are the key challenges we agree to track, with recommended mitigations. We’ll use the checklist to mark progress over time.
+The Digital Songbook focuses on local reliability, privacy, and simplicity. All core features operate offline using a local SQLite database.
 
-### I. Technical & Anti-Scraping Challenges (Backend)
+---
 
-| #   | Challenge                        | Description & Impact                                                           | Mitigation Strategy                                                                                  |
-| --- | -------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| 1   | Dynamic Content & JavaScript     | Many sites render lyrics/chords client-side; raw HTML may not contain content. | Use a headless browser (Playwright/Puppeteer) to fully render before extraction.                     |
-| 2   | Anti-Bot Detection (IP Blocking) | Repeated requests from one IP get flagged; bans possible.                      | Use a reputable rotating proxy; randomize fingerprints; respect robots/ToS and rate limits.          |
-| 3   | Website Structure Changes        | Minor DOM/CSS changes break brittle scrapers.                                  | Build resilient adapters with multiple selectors, change detection, and automated health checks.     |
-| 4   | Rate Limiting & CAPTCHAs         | Throttling and CAPTCHAs can block scrapes.                                     | Exponential backoff, graceful failure, surface “Source unavailable” to user; avoid CAPTCHA-breaking. |
+## ✨ Core Features (Phase 1)
 
-### II. Data & Operational Challenges (Quality & Standardization)
+### 1. Song Library Management
 
-| #   | Challenge                           | Description & Impact                                      | Mitigation Strategy                                                                              |
-| --- | ----------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| 5   | Data Inconsistency (Chord Notation) | Variations like Am7 vs “A minor 7”; inconsistent formats. | Standardization pipeline: map/normalize to a canonical chord set; reject/flag unparseable input. |
-| 6   | Chord/Lyric Alignment               | White-space and format differences break alignment.       | User confirmation/edit screen; or quick admin pass on first lines before publishing.             |
-| 7   | Duplicate Entries                   | Variants like “Song (Live)” vs “Song”.                    | Fuzzy matching (e.g., Levenshtein) to warn/merge before triggering expensive scrape.             |
-| 8   | Moderation Overhead                 | Many user imports need review.                            | UNVERIFIED/VERIFIED flags; show only VERIFIED broadly; schedule weekly moderation.               |
+- **Add & Edit**  
+  Create, edit, and delete songs with required fields:
+  - _Title_
+  - _Body (Lyrics + Chords)_  
+    Optional fields: _Artist, Key_
 
-### III. Legal & Intellectual Property Challenges (Highest Risk)
+- **Search & Filter**  
+  Filter by **Title or Artist** in real-time.
 
-| #   | Challenge                        | Description & Impact                                                          | Mitigation Strategy                                                                                                            |
-| --- | -------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| 9   | Copyright Infringement (Lyrics)  | Lyrics are copyrighted; storing/distributing without license risks liability. | Prefer chords-only or user-owned content for shared catalog; obtain licenses if storing lyrics server-side; get legal counsel. |
-| 10  | Terms of Service (ToS) Violation | Most sites forbid scraping; backend can violate ToS even if user-triggered.   | Use only public, permitted sources; whitelist/licensing; exclude hostile sources; respect robots/ToS.                          |
+- **Favorites**  
+  Mark songs as favorites for quick access via a dedicated tab.
 
-### ✅ Tracking Checklist
+---
 
-- [ ] Design headless rendering adapter (Playwright) with timeouts and size limits.
-- [ ] Add rotating proxy integration and request fingerprint randomization.
-- [ ] Implement adapter health checks and change alerts per source.
-- [ ] Add exponential backoff and user-facing “Source unavailable” messaging.
-- [ ] Build chord normalization pipeline (map to canonical notation; tests).
-- [ ] Implement alignment review UI in import preview (user/admin).
-- [ ] Add fuzzy duplicate detection before scrape (title/artist/lines hash).
-- [ ] Introduce moderation workflow (UNVERIFIED → VERIFIED).
-- [ ] Define legal posture: chords-only vs licensed lyrics; obtain counsel and, if needed, licensing.
-- [ ] Maintain a whitelist of permitted sources and enforce ToS/robots compliance.
+### 2. Song Viewer & Utility Tools
 
-## 🌟 Phase 1 Core Features (MVP)
+- **Chord Parsing & Display**  
+  The app detects chord patterns (e.g., `[C]`, `(Am)`) and visually formats them above lyric lines.
 
-The primary goal of this initial phase is to establish the core song display and personal organization features:
+- **Transposition Tool**  
+  Adjust all chords up (+) or down (–) by semitones — view-only and non-destructive.
 
-1.  **Song List:** A complete, scrollable list of all songs in the library.
-2.  **Filter by Artist:** Easily filter the main list to show songs only by a selected artist.
-3.  **Chord Display:** Display chords clearly formatted **above** the corresponding lyrics for easy reading while playing.
-4.  **Favorites Section:** Users can mark songs as favorites for quick access in a dedicated, separate view.
+- **Auto-Scroll Mode**  
+  Slow, adjustable auto-scroll ideal for rehearsal or live performance.
+
+---
+
+### 3. Import & Export
+
+- **Private Export**  
+  Serialize song data to a `.songbook` file and share via native share sheet  
+  (AirDrop, Email, WhatsApp, etc.)
+
+- **File Import Integration**  
+  The app registers to open `.songbook` files from external sources — tap to import directly into the local library.
+
+---
+
+### 4. (Optional) Pro Feature — Personal Cloud Sync
+
+- **Private Cloud Backup** using Firebase Auth + Firestore
+  - User-authenticated sync
+  - Multi-device backup
+  - Data isolated per user ID
+  - **No public sharing or browsing of others’ libraries**
+
+---
+
+## 🔒 Architectural & Security Principles
+
+| Principle                  | Description                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| **Utility, Not Publisher** | The app does not provide any copyrighted song data — all content is user-entered.  |
+| **Local-First**            | SQLite powers all primary features; cloud sync is optional.                        |
+| **Security & Privacy**     | Firestore rules enforce `request.auth.uid == userId` access — no internal sharing. |
+| **No External Data**       | The app ships empty and never scrapes or fetches third-party sources.              |
+
+---
 
 ## 🛠️ Technology Stack
 
-| Component            | Technology                | Purpose                                             |
-| :------------------- | :------------------------ | :-------------------------------------------------- |
-| **Framework**        | Expo & React Native       | Cross-platform mobile development (iOS & Android).  |
-| **Language**         | JavaScript/TypeScript     | Core application logic.                             |
-| **Navigation**       | React Navigation          | Handling screen routing (Home, Details, Favorites). |
-| **Data Persistence** | AsyncStorage (or similar) | Storing the user's favorite songs list state.       |
+| Component  | Technology                  | Purpose                          |
+| ---------- | --------------------------- | -------------------------------- |
+| Framework  | React Native (Expo)         | Cross-platform app development   |
+| Language   | TypeScript                  | Maintainability & type safety    |
+| Navigation | React Navigation            | Screen routing (tabs/navigation) |
+| Local Data | expo-sqlite                 | Offline song storage             |
+| Cloud Sync | Firebase (Auth + Firestore) | Optional private backup          |
+| Sharing    | react-native-share          | Native share sheet invocation    |
 
-## 🚀 Getting Started
+---
 
-Follow these steps to set up and run the project locally.
+## 🛑 Out of Scope — Phase 1
 
-### Prerequisites
+These are intentionally excluded from MVP:
 
-You must have **Node.js**, **npm/yarn**, and the **Expo CLI** installed on your machine.
+❌ Public song database  
+❌ User following or in-app sharing  
+❌ Web search / scraping features  
+❌ Setlist management  
+❌ Support for PDF, MusicXML, images, etc.
 
-````bash
-npm install -g expo-cli
-```
+---
 
-# # Welcome to your Expo app 👋
-
-## 🔧 Environment
-
-We use Expo public environment variables for feature flags. Copy `.env.example` to `.env` and edit as needed.
+## ⚙️ Installation & Development Setup
 
 ```bash
-cp .env.example .env
+# Clone repository
+git clone [repository-url]
+cd digital-songbook-app
+
+# Install dependencies
+yarn install
+# or
+npm install
+
+# Start Expo Development Server
+npx expo start
 ```
-
-Available flags:
-
-- `EXPO_PUBLIC_SEARCH_ONLINE` (default: `false`)
-	- Enables the client-only stub screen at route `/search-online`.
-	- When `false`, the screen shows a gated message.
-	- When `true`, you can type a query and see mock results from the stub.
-
-- `EXPO_PUBLIC_GOOGLE_CSE_KEY` and `EXPO_PUBLIC_GOOGLE_CSE_CX`
-	- If both are set, the app will use Google Custom Search to fetch results.
-	- Results are limited to one per site by querying each site separately.
-	- For production, prefer calling CSE from a server to avoid exposing keys.
-
-- `EXPO_PUBLIC_SEARCH_SITES`
-	- Comma-separated list of domains to search (e.g., `example.com,foo.org,bar.net`).
-	- The app queries each site and returns at most one result per site.
-
-Note: Only `EXPO_PUBLIC_*` variables are automatically injected into the app bundle by Expo.
-
-# This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
-# ## Get started
-
-# 1. Install dependencies
-
-#    ```bash
-#    npm install
-#    ```
-
-# 2. Start the app
-
-#    ```bash
-#    npx expo start
-#    ```
-
-# In the output, you'll find options to open the app in a
-
-# - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-# - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-# - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-# - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-# You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-# ## Get a fresh project
-
-# When you're ready, run:
-
-# ```bash
-# npm run reset-project
-# ```
-
-# This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-# ## Learn more
-
-# To learn more about developing your project with Expo, look at the following resources:
-
-# - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-# - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-# ## Join the community
-
-# Join our community of developers creating universal apps.
-
-# - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-# - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-
-````

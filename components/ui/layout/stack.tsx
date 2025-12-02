@@ -1,7 +1,8 @@
 import { Spacing } from "@/constants/tokens";
 import React, { Fragment, ReactNode } from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
-import { Spacer, spaceStyle, type SpaceProps } from ".";
+import { spaceStyle, type SpaceProps } from "./space";
+import { Spacer } from "./spacer";
 
 export type StackProps = {
   children?: React.ReactNode;
@@ -32,9 +33,7 @@ export function Stack({
   const items = React.Children.toArray(children);
 
   if (items.length === 0) {
-    return (
-      <View style={[{ flexDirection: direction }, style]} testID={testID} />
-    );
+    return <View style={[{ flexDirection: direction }, style]} testID={testID} />;
   }
 
   const interleaved: ReactNode[] = [];
@@ -43,9 +42,7 @@ export function Stack({
       if (divider) {
         interleaved.push(<Fragment key={`divider-${idx}`}>{divider}</Fragment>);
       }
-      interleaved.push(
-        <Spacer key={`spacer-${idx}`} size={space} axis={axis} />
-      );
+      interleaved.push(<Spacer key={`spacer-${idx}`} size={space} axis={axis} />);
     }
     interleaved.push(<Fragment key={`item-${idx}`}>{child}</Fragment>);
   });

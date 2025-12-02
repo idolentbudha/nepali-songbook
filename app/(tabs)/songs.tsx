@@ -1,9 +1,7 @@
-import {
-  ArtistsAccordion,
-  type ArtistGroup,
-} from "@/components/artists-accordion";
+import { ArtistsAccordion, type ArtistGroup } from "@/components/artists-accordion";
 import { SearchBar } from "@/components/search-bar";
 import { SongList } from "@/components/song-list";
+import { ThemedView } from "@/components/themed-view";
 import { UiText } from "@/components/ui/Text";
 import { getAllSongs } from "@/lib/data/all-songs";
 import { useFavorites } from "@/lib/storage/favorites";
@@ -33,10 +31,10 @@ export default function SongsScreen() {
   const songsFiltered = useMemo(() => {
     const t = term.trim().toLowerCase();
     if (!t) return songs;
-    return songs.filter((s) => {
+    return songs.filter(s => {
       const inTitle = s.title.toLowerCase().includes(t);
       const inArtist = s.artist.toLowerCase().includes(t);
-      const inTags = s.tags?.some((x) => x.toLowerCase().includes(t));
+      const inTags = s.tags?.some(x => x.toLowerCase().includes(t));
       return inTitle || inArtist || inTags;
     });
   }, [songs, term]);
@@ -56,47 +54,49 @@ export default function SongsScreen() {
   const artistGroupsFiltered: ArtistGroup[] = useMemo(() => {
     const t = term.trim().toLowerCase();
     if (!t) return artistGroups;
-    return artistGroups.filter((g) => g.name.toLowerCase().includes(t));
+    return artistGroups.filter(g => g.name.toLowerCase().includes(t));
   }, [artistGroups, term]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
-        <UiText variant="title">{mode === "all" ? "Songs" : "Artists"}</UiText>
-      </View>
-      <SearchBar value={term} onChange={setTerm} onClear={() => setTerm("")} />
-      <View
-        style={{
-          paddingHorizontal: 16,
-          paddingBottom: 8,
-          flexDirection: "row",
-        }}
-      >
-        <Segmented
-          value={mode}
-          onChange={(next) => setMode(next as any)}
-          options={[
-            { key: "all", label: "ALL" },
-            { key: "artists", label: "ARTISTS" },
-          ]}
-        />
-      </View>
+    <ThemedView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
+          <UiText variant="title">{mode === "all" ? "Songs" : "Artists"}</UiText>
+        </View>
+        <SearchBar value={term} onChange={setTerm} onClear={() => setTerm("")} />
+        <View
+          style={{
+            paddingHorizontal: 16,
+            paddingBottom: 8,
+            flexDirection: "row",
+          }}
+        >
+          <Segmented
+            value={mode}
+            onChange={next => setMode(next as any)}
+            options={[
+              { key: "all", label: "ALL" },
+              { key: "artists", label: "ARTISTS" },
+            ]}
+          />
+        </View>
 
-      {mode === "all" ? (
-        <SongList
-          songs={songsFiltered}
-          // Cast to any to avoid TS path union issues when expo-router typegen isn't active in tsc
-          onPressItem={(song) => router.push(`/song/${song.id}` as any)}
-          isFavorite={(id) => fav.isFavorite(id)}
-          onToggleFavorite={(id) => fav.toggleFavorite(id)}
-        />
-      ) : (
-        <ArtistsAccordion
-          items={artistGroupsFiltered}
-          onPressSong={(song) => router.push(`/song/${song.id}` as any)}
-        />
-      )}
-    </SafeAreaView>
+        {mode === "all" ? (
+          <SongList
+            songs={songsFiltered}
+            // Cast to any to avoid TS path union issues when expo-router typegen isn't active in tsc
+            onPressItem={song => router.push(`/song/${song.id}` as any)}
+            isFavorite={id => fav.isFavorite(id)}
+            onToggleFavorite={id => fav.toggleFavorite(id)}
+          />
+        ) : (
+          <ArtistsAccordion
+            items={artistGroupsFiltered}
+            onPressSong={song => router.push(`/song/${song.id}` as any)}
+          />
+        )}
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
