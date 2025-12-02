@@ -15,7 +15,10 @@ export default function TabLayout() {
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="add">
         <Icon
-          sf={{ default: "square.and.pencil", selected: "square.and.pencil" }}
+          sf={{
+            default: "square.and.pencil",
+            selected: "square.and.pencil",
+          }}
         />
       </NativeTabs.Trigger>
     </NativeTabs>

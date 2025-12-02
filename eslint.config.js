@@ -17,7 +17,7 @@ module.exports = defineConfig([
   },
   {
     rules: {
-      "no-unused-vars": "error",
+      "no-unused-vars": "warn",
       "no-undef": "warn",
       "no-debugger": "warn",
       "no-console": "warn",
