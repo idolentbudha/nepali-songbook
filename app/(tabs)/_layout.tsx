@@ -1,10 +1,9 @@
 import React from "react";
 
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Icon, NativeTabs } from "expo-router/unstable-native-tabs";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  // const colorScheme = useColorScheme();
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="songs">
