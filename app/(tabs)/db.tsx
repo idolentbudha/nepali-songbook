@@ -4,7 +4,7 @@ import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import * as SQLite from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import { usersTable } from "./../../db/schema";
+import { usersTable } from "../../database/schema";
 import migrations from "./../../drizzle/migrations";
 
 const expo = SQLite.openDatabaseSync("db.db");
