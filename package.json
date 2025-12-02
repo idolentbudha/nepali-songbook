@@ -51,7 +51,7 @@
         "typescript": "~5.9.2"
     },
     "lint-staged": {
-        "*.{js,jsx,ts,tsx}": "eslint"
+        "*.{js,jsx,ts,tsx}": "npx eslint"
     },
     "private": true
 }
