@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/Button";
 import { Stack } from "@/components/ui/layout/stack";
 import { UiText } from "@/components/ui/Text";
 import { Radius, Typography } from "@/constants/tokens";
+import db from "@/database";
+import { userSongsTable } from "@/database/schema";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { clearImportDraft, getImportDraft } from "@/lib/storage/import-draft";
 import { addUserSong, makeUserSongId } from "@/lib/storage/user-songs";
@@ -74,7 +76,25 @@ export default function AddSongScreen() {
         tags,
         lines,
       };
+      // Persist to AsyncStorage (existing behavior)
       await addUserSong(song);
+
+      // Also persist to SQLite via Drizzle
+      try {
+        await db.insert(userSongsTable).values({
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          key: song.key ?? (null as any),
+          capo: song.capo ?? (null as any),
+          bpm: song.bpm ?? (null as any),
+          tags: (song.tags ?? []).join(","),
+          lines: (song.lines ?? []).join("\n"),
+        } as any);
+      } catch (dbErr) {
+        // Non-blocking: continue even if DB write fails
+        console.warn("DB insert failed:", dbErr);
+      }
       Alert.alert("Saved", "Your song was added to the library.", [
         {
           text: "View",

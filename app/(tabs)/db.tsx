@@ -1,4 +1,5 @@
 import { ThemedView } from "@/components/themed-view";
+import { runSeeds } from "@/database/seed";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import * as SQLite from "expo-sqlite";
@@ -30,6 +31,8 @@ export default function DatabaseView() {
       ]);
 
       const users = await db.select().from(usersTable);
+      // Run seed data for user_songs after migrations
+      await runSeeds();
       setItems(users);
     })();
   }, [success]);
