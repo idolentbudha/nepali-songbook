@@ -1,80 +1,82 @@
 import React from "react";
 
+import { HapticTab } from "@/components/haptic-tab";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Tabs } from "expo-router";
 import { Icon, NativeTabs } from "expo-router/unstable-native-tabs";
+import { Platform } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const isIOS = Platform.OS === "ios";
+  const versionRaw = Platform.Version;
+  const majorVersion =
+    typeof versionRaw === "string" ? parseInt(versionRaw.split(".")[0], 10) : versionRaw;
+  const isVersion26 = isIOS && majorVersion >= 26;
+
+  const tabs = [
+    {
+      name: "songs" as const,
+      title: "Songs",
+      sfIcon: { default: "music.note", selected: "music.note.list" },
+      iconSymbol: "music.note.list" as const,
+    },
+    {
+      name: "index" as const,
+      title: "Search",
+      sfIcon: { default: "magnifyingglass", selected: "magnifyingglass" },
+      iconSymbol: "magnifyingglass" as const,
+    },
+    {
+      name: "favorites" as const,
+      title: "Favorites",
+      sfIcon: { default: "heart", selected: "heart.fill" },
+      iconSymbol: "heart.fill" as const,
+    },
+    {
+      name: "add" as const,
+      title: "Add",
+      sfIcon: { default: "square.and.pencil", selected: "square.and.pencil" },
+      iconSymbol: "square.and.pencil" as const,
+    },
+    {
+      name: "db" as const,
+      title: "DB",
+      sfIcon: { default: "list.bullet.rectangle", selected: "list.bullet.rectangle" },
+      iconSymbol: "list.bullet.rectangle" as const,
+    },
+  ] as const;
+  if (isVersion26) {
+    return (
+      <NativeTabs disableTransparentOnScrollEdge={!isVersion26}>
+        {tabs.map(t => (
+          <NativeTabs.Trigger key={t.name} name={t.name}>
+            <Icon sf={t.sfIcon} />
+          </NativeTabs.Trigger>
+        ))}
+      </NativeTabs>
+    );
+  }
   return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="songs">
-        <Icon sf={{ default: "music.note", selected: "music.note.list" }} />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="favorites">
-        <Icon sf={{ default: "heart", selected: "heart.fill" }} />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="add">
-        <Icon
-          sf={{
-            default: "square.and.pencil",
-            selected: "square.and.pencil",
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        headerShown: false,
+        tabBarButton: HapticTab,
+      }}
+    >
+      {tabs.map(t => (
+        <Tabs.Screen
+          key={t.name}
+          name={t.name}
+          options={{
+            title: t.title,
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name={t.iconSymbol} color={color} />,
           }}
         />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="db">
-        <Icon
-          sf={{
-            default: "list.bullet.rectangle",
-            selected: "list.bullet.rectangle",
-          }}
-        />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+      ))}
+    </Tabs>
   );
-  // return (
-  //   <Tabs
-  //     screenOptions={{
-  //       tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-  //       headerShown: false,
-  //       tabBarButton: HapticTab,
-  //     }}
-  //   >
-  //     <Tabs.Screen
-  //       name="songs"
-  //       options={{
-  //         title: "Songs",
-  //         tabBarIcon: ({ color }) => (
-  //           <IconSymbol size={28} name="music.note.list" color={color} />
-  //         ),
-  //       }}
-  //     />
-  //     <Tabs.Screen
-  //       name="index"
-  //       options={{
-  //         title: "Search",
-  //         tabBarIcon: ({ color }) => (
-  //           <IconSymbol size={28} name="magnifyingglass" color={color} />
-  //         ),
-  //       }}
-  //     />
-  //     <Tabs.Screen
-  //       name="favorites"
-  //       options={{
-  //         title: "Favorites",
-  //         tabBarIcon: ({ color }) => (
-  //           <IconSymbol size={28} name="heart.fill" color={color} />
-  //         ),
-  //       }}
-  //     />
-  //     <Tabs.Screen
-  //       name="add"
-  //       options={{
-  //         title: "Add",
-  //         tabBarIcon: ({ color }) => (
-  //           <IconSymbol size={28} name="square.and.pencil" color={color} />
-  //         ),
-  //       }}
-  //     />
-  //   </Tabs>
-  // );
 }

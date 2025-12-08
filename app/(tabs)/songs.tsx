@@ -9,6 +9,7 @@ import type { Song } from "@/types/song";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
+import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SongsScreen() {
@@ -59,42 +60,46 @@ export default function SongsScreen() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
-          <UiText variant="title">{mode === "all" ? "Songs" : "Artists"}</UiText>
-        </View>
-        <SearchBar value={term} onChange={setTerm} onClear={() => setTerm("")} />
-        <View
-          style={{
-            paddingHorizontal: 16,
-            paddingBottom: 8,
-            flexDirection: "row",
-          }}
-        >
-          <Segmented
-            value={mode}
-            onChange={next => setMode(next as any)}
-            options={[
-              { key: "all", label: "ALL" },
-              { key: "artists", label: "ARTISTS" },
-            ]}
-          />
-        </View>
+      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+        <ThemedView>
+          <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
+            <UiText variant="title">{mode === "all" ? "Songs" : "Artists"}</UiText>
+          </View>
+          <Animated.View>
+            <SearchBar value={term} onChange={setTerm} onClear={() => setTerm("")} />
+            <View
+              style={{
+                paddingHorizontal: 16,
+                paddingBottom: 8,
+                flexDirection: "row",
+              }}
+            >
+              <Segmented
+                value={mode}
+                onChange={next => setMode(next as any)}
+                options={[
+                  { key: "all", label: "ALL" },
+                  { key: "artists", label: "ARTISTS" },
+                ]}
+              />
+            </View>
+          </Animated.View>
 
-        {mode === "all" ? (
-          <SongList
-            songs={songsFiltered}
-            // Cast to any to avoid TS path union issues when expo-router typegen isn't active in tsc
-            onPressItem={song => router.push(`/song/${song.id}` as any)}
-            isFavorite={id => fav.isFavorite(id)}
-            onToggleFavorite={id => fav.toggleFavorite(id)}
-          />
-        ) : (
-          <ArtistsAccordion
-            items={artistGroupsFiltered}
-            onPressSong={song => router.push(`/song/${song.id}` as any)}
-          />
-        )}
+          {mode === "all" ? (
+            <SongList
+              songs={songsFiltered}
+              // Cast to any to avoid TS path union issues when expo-router typegen isn't active in tsc
+              onPressItem={song => router.push(`/song/${song.id}` as any)}
+              isFavorite={id => fav.isFavorite(id)}
+              onToggleFavorite={id => fav.toggleFavorite(id)}
+            />
+          ) : (
+            <ArtistsAccordion
+              items={artistGroupsFiltered}
+              onPressSong={song => router.push(`/song/${song.id}` as any)}
+            />
+          )}
+        </ThemedView>
       </SafeAreaView>
     </ThemedView>
   );

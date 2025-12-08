@@ -12,12 +12,7 @@ export type SongListProps = {
   onToggleFavorite?: (id: string, next: boolean) => void;
 };
 
-export function SongList({
-  songs,
-  onPressItem,
-  isFavorite,
-  onToggleFavorite,
-}: SongListProps) {
+export function SongList({ songs, onPressItem, isFavorite, onToggleFavorite }: SongListProps) {
   if (!songs || songs.length === 0) {
     return (
       <View style={{ padding: 16 }}>
@@ -29,7 +24,7 @@ export function SongList({
   return (
     <FlatList
       data={songs}
-      keyExtractor={(item) => item.id}
+      keyExtractor={item => item.id}
       ItemSeparatorComponent={() => <Spacer size={2} />}
       renderItem={({ item }) => (
         <SongItem
@@ -39,7 +34,7 @@ export function SongList({
           onToggleFavorite={onToggleFavorite}
         />
       )}
-      contentContainerStyle={{ paddingVertical: 8 }}
+      contentContainerStyle={{ paddingVertical: 8, paddingBottom: 100 }}
     />
   );
 }
