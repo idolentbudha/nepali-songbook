@@ -1,5 +1,7 @@
+import { DATABASE_NAME } from "@/constants/constants";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import * as SQLite from "expo-sqlite";
-const expo = SQLite.openDatabaseSync("db.db");
-const db = drizzle(expo);
-export default db;
+
+const expo_db = SQLite.openDatabaseSync(DATABASE_NAME);
+const db = drizzle(expo_db);
+export { db, expo_db };

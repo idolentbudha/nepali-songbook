@@ -1,65 +1,57 @@
 import { ThemedView } from "@/components/themed-view";
+import { Button } from "@/components/ui/Button";
+import { VStack } from "@/components/ui/layout";
+import { db } from "@/database";
 import { runSeeds } from "@/database/seed";
-import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import * as SQLite from "expo-sqlite";
-import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Text, TextInput } from "react-native";
 import { usersTable } from "../../database/schema";
 import migrations from "./../../drizzle/migrations";
 
-const expo = SQLite.openDatabaseSync("db.db");
-
-const db = drizzle(expo);
-
 export default function DatabaseView() {
   const { success, error } = useMigrations(db, migrations);
-  const [items, setItems] = useState<(typeof usersTable.$inferSelect)[] | null>(null);
+  const [items, setItems] = useState<(typeof usersTable.$inferSelect)[] | null>([]);
+  const nameRef = useRef<TextInput>(null);
+  const ageRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const [userForm, setUserForm] = useState({ name: "", age: "", email: "" });
 
   useEffect(() => {
     if (!success) return;
 
     (async () => {
-      await db.delete(usersTable);
+      // await db.delete(usersTable);
 
-      await db.insert(usersTable).values([
-        {
-          name: "John",
-          age: 30,
-          email: "john@example.com",
-        },
-      ]);
+      // await db.insert(usersTable).values([
+      //   {
+      //     name: "John",
+      //     age: 30,
+      //     email: "john@example.com",
+      //   },
+      // ]);
 
-      const users = await db.select().from(usersTable);
+      // const users = await db.select().from(usersTable);
       // Run seed data for user_songs after migrations
       await runSeeds();
-      setItems(users);
     })();
   }, [success]);
 
-  if (error) {
-    return (
-      <View>
-        <Text>Migration error: {error.message}</Text>
-      </View>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <View>
+  //       <Text>Migration error: {error.message}</Text>
+  //     </View>
+  //   );
+  // }
 
-  if (!success) {
-    return (
-      <View>
-        <Text>Migration is in progress...</Text>
-      </View>
-    );
-  }
-
-  if (items === null || items.length === 0) {
-    return (
-      <View>
-        <Text>Empty</Text>
-      </View>
-    );
-  }
+  // if (!success) {
+  //   return (
+  //     <View>
+  //       <Text>Migration is in progress...</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <ThemedView
@@ -75,6 +67,65 @@ export default function DatabaseView() {
       {items.map(item => (
         <Text key={item.id}>{item.email}</Text>
       ))}
+      <Button
+        title="Fetch Users"
+        onPress={async () => {
+          const users = await db.select().from(usersTable);
+          setItems(users);
+        }}
+      />
+
+      <VStack space={2}>
+        <TextInput
+          ref={nameRef}
+          placeholder="Name"
+          style={{ borderWidth: 1, width: 200, marginTop: 20 }}
+          onChangeText={v => {
+            setUserForm(p => {
+              return { ...p, name: v };
+            });
+          }}
+        />
+        <TextInput
+          ref={ageRef}
+          placeholder="Age"
+          style={{ borderWidth: 1, width: 200, marginTop: 20 }}
+          onChangeText={v => {
+            setUserForm(p => {
+              return { ...p, age: v };
+            });
+          }}
+        />
+        <TextInput
+          ref={emailRef}
+          placeholder="Email"
+          style={{ borderWidth: 1, width: 200, marginTop: 20 }}
+          onChangeText={v => {
+            setUserForm(p => {
+              return { ...p, email: v };
+            });
+          }}
+        />
+        <Button
+          title="Save User"
+          onPress={async () => {
+            const _data = {
+              name: nameRef.current,
+              // age: ageRef.current?.value,
+              // email: emailRef.current?.value,
+            };
+            console.log("data:", userForm);
+            await db.insert(usersTable).values({
+              name: userForm.name,
+              age: parseInt(userForm.age, 10),
+              email: userForm.email,
+            });
+            const users = await db.select().from(usersTable);
+            setItems(users);
+            setUserForm({ name: "", age: "", email: "" });
+          }}
+        />
+      </VStack>
     </ThemedView>
   );
 }

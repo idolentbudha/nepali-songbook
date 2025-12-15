@@ -1,4 +1,4 @@
-import db from "@/database";
+import { db } from "@/database";
 import { userSongsTable } from "@/database/schema";
 import { getSongs } from "@/lib/data/songs";
 import type { Song } from "@/types/song";
@@ -27,10 +27,12 @@ export async function getAllSongs(): Promise<Song[]> {
   try {
     const rows = await db.select().from(userSongsTable);
     userDb = rows.map(mapDbRowToSong);
+    console.log("songs_home:", rows);
   } catch (_) {
     userDb = [];
   }
-  return [...base, ...userDb];
+  // return [...base, ...userDb];
+  return [...userDb];
 }
 
 export async function findAnySongById(id: string): Promise<Song | undefined> {

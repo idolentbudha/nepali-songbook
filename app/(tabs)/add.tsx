@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/Button";
 import { Stack } from "@/components/ui/layout/stack";
 import { UiText } from "@/components/ui/Text";
 import { Radius, Typography } from "@/constants/tokens";
-import db from "@/database";
+import { db } from "@/database";
 import { userSongsTable } from "@/database/schema";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { clearImportDraft, getImportDraft } from "@/lib/storage/import-draft";
-import { addUserSong, makeUserSongId } from "@/lib/storage/user-songs";
+import { makeUserSongId } from "@/lib/storage/user-songs";
 import type { Song } from "@/types/song";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -77,7 +77,7 @@ export default function AddSongScreen() {
         lines,
       };
       // Persist to AsyncStorage (existing behavior)
-      await addUserSong(song);
+      // await addUserSong(song);
 
       // Also persist to SQLite via Drizzle
       try {

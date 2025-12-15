@@ -3,7 +3,10 @@ import { Spacer } from "@/components/ui/layout/spacer";
 import { Stack } from "@/components/ui/layout/stack";
 import { UiText } from "@/components/ui/Text";
 import { Radius } from "@/constants/tokens";
+import { db } from "@/database";
+import { userSongsTable } from "@/database/schema";
 import type { Song } from "@/types/song";
+import { eq } from "drizzle-orm";
 import React from "react";
 import { Pressable, View } from "react-native";
 
@@ -14,12 +17,7 @@ export type SongItemProps = {
   onToggleFavorite?: (id: string, next: boolean) => void;
 };
 
-export function SongItem({
-  song,
-  onPress,
-  onToggleFavorite,
-  isFavorite,
-}: SongItemProps) {
+export function SongItem({ song, onPress, onToggleFavorite, isFavorite }: SongItemProps) {
   const fav = !!isFavorite;
   const toggle = () => onToggleFavorite?.(song.id, !fav);
 
@@ -47,10 +45,8 @@ export function SongItem({
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={
-            fav ? "Remove from favorites" : "Add to favorites"
-          }
-          onPress={(e) => {
+          accessibilityLabel={fav ? "Remove from favorites" : "Add to favorites"}
+          onPress={e => {
             e.stopPropagation();
             toggle();
           }}
@@ -58,6 +54,22 @@ export function SongItem({
         >
           <IconSymbol
             name={fav ? "heart.fill" : "heart"}
+            size={24}
+            color={fav ? "#ef4444" : "#9ca3af"}
+          />
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={fav ? "Remove from favorites" : "Add to favorites"}
+          onPress={async e => {
+            e.stopPropagation();
+            await db.delete(userSongsTable).where(eq(userSongsTable.id, song.id));
+            alert(`Deleted song: ${song.title}`);
+          }}
+          style={{ padding: 8 }}
+        >
+          <IconSymbol
+            name={fav ? "trash.fill" : "trash"}
             size={24}
             color={fav ? "#ef4444" : "#9ca3af"}
           />

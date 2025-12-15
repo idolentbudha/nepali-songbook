@@ -3,6 +3,8 @@ import { SearchBar } from "@/components/search-bar";
 import { SongList } from "@/components/song-list";
 import { ThemedView } from "@/components/themed-view";
 import { UiText } from "@/components/ui/Text";
+import { db } from "@/database";
+import { usersTable } from "@/database/schema";
 import { getAllSongs } from "@/lib/data/all-songs";
 import { useFavorites } from "@/lib/storage/favorites";
 import type { Song } from "@/types/song";
@@ -17,6 +19,10 @@ export default function SongsScreen() {
   const [songs, setSongs] = useState<Song[]>([]);
   useEffect(() => {
     let mounted = true;
+    (async () => {
+      const users_data = await db.select().from(usersTable);
+      console.log("usersTable_home:", users_data);
+    })();
     (async () => {
       const all = await getAllSongs();
       if (mounted) setSongs(all);

@@ -4,4 +4,7 @@ export default defineConfig({
   driver: "expo",
   schema: "./database/schema.ts",
   out: "./drizzle",
+  // dbCredentials: {
+  //   url: "postgresql://user:password@host:port/dbname",
+  // },
 });
