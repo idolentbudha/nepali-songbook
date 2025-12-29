@@ -1,5 +1,5 @@
 import { MOCKED_SEARCH_SCREEN_DATA } from "@/constants/dummy-responses";
-import db from "@/database";
+import { db } from "@/database";
 import { userSongsTable } from "@/database/schema";
 
 type SeedSong = {

@@ -4,4 +4,5 @@ import * as SQLite from "expo-sqlite";
 
 const expo_db = SQLite.openDatabaseSync(DATABASE_NAME);
 const db = drizzle(expo_db);
+
 export { db, expo_db };

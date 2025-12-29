@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/Button";
 import { VStack } from "@/components/ui/layout";
 import { db } from "@/database";
 import { runSeeds } from "@/database/seed";
+import { exportDB } from "@/lib/db";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useEffect, useRef, useState } from "react";
-import { Text, TextInput } from "react-native";
+import { ScrollView, Text, TextInput } from "react-native";
 import { usersTable } from "../../database/schema";
 import migrations from "./../../drizzle/migrations";
 
@@ -54,78 +55,92 @@ export default function DatabaseView() {
   // }
 
   return (
-    <ThemedView
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        justifyContent: "center",
-      }}
-    >
-      {items.map(item => (
-        <Text key={item.id}>{item.email}</Text>
-      ))}
-      <Button
-        title="Fetch Users"
-        onPress={async () => {
-          const users = await db.select().from(usersTable);
-          setItems(users);
+    <ScrollView contentContainerStyle={{ flex: 1 }}>
+      <ThemedView
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          height: "100%",
+          justifyContent: "center",
         }}
-      />
-
-      <VStack space={2}>
-        <TextInput
-          ref={nameRef}
-          placeholder="Name"
-          style={{ borderWidth: 1, width: 200, marginTop: 20 }}
-          onChangeText={v => {
-            setUserForm(p => {
-              return { ...p, name: v };
-            });
-          }}
-        />
-        <TextInput
-          ref={ageRef}
-          placeholder="Age"
-          style={{ borderWidth: 1, width: 200, marginTop: 20 }}
-          onChangeText={v => {
-            setUserForm(p => {
-              return { ...p, age: v };
-            });
-          }}
-        />
-        <TextInput
-          ref={emailRef}
-          placeholder="Email"
-          style={{ borderWidth: 1, width: 200, marginTop: 20 }}
-          onChangeText={v => {
-            setUserForm(p => {
-              return { ...p, email: v };
-            });
-          }}
-        />
+      >
+        {items.map(item => (
+          <Text key={item.id}>{item.email}</Text>
+        ))}
         <Button
-          title="Save User"
+          title="Fetch Users"
           onPress={async () => {
-            const _data = {
-              name: nameRef.current,
-              // age: ageRef.current?.value,
-              // email: emailRef.current?.value,
-            };
-            console.log("data:", userForm);
-            await db.insert(usersTable).values({
-              name: userForm.name,
-              age: parseInt(userForm.age, 10),
-              email: userForm.email,
-            });
             const users = await db.select().from(usersTable);
             setItems(users);
-            setUserForm({ name: "", age: "", email: "" });
           }}
         />
-      </VStack>
-    </ThemedView>
+
+        <VStack space={2}>
+          <TextInput
+            ref={nameRef}
+            placeholder="Name"
+            style={{ borderWidth: 1, width: 200, marginTop: 20 }}
+            onChangeText={v => {
+              setUserForm(p => {
+                return { ...p, name: v };
+              });
+            }}
+          />
+          <TextInput
+            ref={ageRef}
+            placeholder="Age"
+            style={{ borderWidth: 1, width: 200, marginTop: 20 }}
+            onChangeText={v => {
+              setUserForm(p => {
+                return { ...p, age: v };
+              });
+            }}
+          />
+          <TextInput
+            ref={emailRef}
+            placeholder="Email"
+            style={{ borderWidth: 1, width: 200, marginTop: 20 }}
+            onChangeText={v => {
+              setUserForm(p => {
+                return { ...p, email: v };
+              });
+            }}
+          />
+          <Button
+            title="Save User"
+            onPress={async () => {
+              const _data = {
+                name: nameRef.current,
+                // age: ageRef.current?.value,
+                // email: emailRef.current?.value,
+              };
+              console.log("data:", userForm);
+              await db.insert(usersTable).values({
+                name: userForm.name,
+                age: parseInt(userForm.age, 10),
+                email: userForm.email,
+              });
+              const users = await db.select().from(usersTable);
+              setItems(users);
+              setUserForm({ name: "", age: "", email: "" });
+            }}
+          />
+          <Button
+            title="Export Data"
+            onPress={() => {
+              exportDB();
+            }}
+          />
+          <Button
+            title="Import Data"
+            onPress={async e => {
+              e.stopPropagation();
+            }}
+          />
+        </VStack>
+      </ThemedView>
+    </ScrollView>
   );
 }
