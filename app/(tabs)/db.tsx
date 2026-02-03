@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { VStack } from "@/components/ui/layout";
 import { db } from "@/database";
 import { runSeeds } from "@/database/seed";
-import { exportDB } from "@/lib/db";
+import { clearSongsTable, exportDB, exportSongsCSV, importSongsCSV } from "@/lib/db";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, TextInput } from "react-native";
@@ -134,9 +134,24 @@ export default function DatabaseView() {
             }}
           />
           <Button
-            title="Import Data"
+            title="Export Songs CVS"
+            onPress={() => {
+              exportSongsCSV();
+            }}
+          />
+          <Button
+            title="Import CSV Data"
             onPress={async e => {
               e.stopPropagation();
+              await importSongsCSV();
+            }}
+          />
+
+          <Button
+            title="Clear Songs"
+            onPress={e => {
+              e.stopPropagation();
+              clearSongsTable();
             }}
           />
         </VStack>

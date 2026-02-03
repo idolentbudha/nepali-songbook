@@ -8,7 +8,7 @@ import { usersTable } from "@/database/schema";
 import { getAllSongs } from "@/lib/data/all-songs";
 import { useFavorites } from "@/lib/storage/favorites";
 import type { Song } from "@/types/song";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
 import Animated from "react-native-reanimated";
@@ -31,6 +31,20 @@ export default function SongsScreen() {
       mounted = false;
     };
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let mounted = true;
+      (async () => {
+        const all = await getAllSongs();
+        if (mounted) setSongs(all);
+      })();
+      return () => {
+        mounted = false;
+      };
+    }, [])
+  );
+
   const [mode, setMode] = useState<"all" | "artists">("all");
   const [term, setTerm] = useState("");
   const fav = useFavorites();
