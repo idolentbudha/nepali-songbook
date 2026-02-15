@@ -6,7 +6,7 @@ import { UiText } from "@/components/ui/Text";
 import { findAnySongById } from "@/lib/data/all-songs";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SongDetailScreen() {
@@ -47,17 +47,19 @@ export default function SongDetailScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
-        <UiText variant="title">{song.title}</UiText>
-        <Spacer size={1} />
-        <UiText variant="caption">{song.artist}</UiText>
-      </View>
-      <SongRenderProvider>
-        <SongRenderControls languages={Object.keys(song.lyricsByLang ?? {})} />
-        <View style={{ paddingHorizontal: 16, paddingBottom: 24 }}>
-          <SongView song={song} />
+      <ScrollView style={{ flex: 1 }}>
+        <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+          <UiText variant="title">{song.title}</UiText>
+          <Spacer size={1} />
+          <UiText variant="caption">{song.artist}</UiText>
         </View>
-      </SongRenderProvider>
+        <SongRenderProvider>
+          <SongRenderControls languages={Object.keys(song.lyricsByLang ?? {})} />
+          <View style={{ paddingHorizontal: 16, paddingBottom: 24 }}>
+            <SongView song={song} />
+          </View>
+        </SongRenderProvider>
+      </ScrollView>
     </SafeAreaView>
   );
 }

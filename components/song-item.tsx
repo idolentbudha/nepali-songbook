@@ -15,9 +15,10 @@ export type SongItemProps = {
   onPress?: (song: Song) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string, next: boolean) => void;
+  onDelete?: (song: Song) => void;
 };
 
-export function SongItem({ song, onPress, onToggleFavorite, isFavorite }: SongItemProps) {
+export function SongItem({ song, onPress, onToggleFavorite, isFavorite, onDelete }: SongItemProps) {
   const fav = !!isFavorite;
   const toggle = () => onToggleFavorite?.(song.id, !fav);
 
@@ -60,19 +61,16 @@ export function SongItem({ song, onPress, onToggleFavorite, isFavorite }: SongIt
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={fav ? "Remove from favorites" : "Add to favorites"}
+          accessibilityLabel="Delete song"
           onPress={async e => {
             e.stopPropagation();
             await db.delete(userSongsTable).where(eq(userSongsTable.id, song.id));
             alert(`Deleted song: ${song.title}`);
+            onDelete?.(song);
           }}
           style={{ padding: 8 }}
         >
-          <IconSymbol
-            name={fav ? "trash.fill" : "trash"}
-            size={24}
-            color={fav ? "#ef4444" : "#9ca3af"}
-          />
+          <IconSymbol name={fav ? "trash.fill" : "trash"} size={24} color={"#9ca3af"} />
         </Pressable>
       </Stack>
     </Pressable>

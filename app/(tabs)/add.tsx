@@ -6,6 +6,7 @@ import { Radius, Typography } from "@/constants/tokens";
 import { db } from "@/database";
 import { userSongsTable } from "@/database/schema";
 import { useThemeColor } from "@/hooks/use-theme-color";
+import { normalizeChordMarkup, parseChordNotation } from "@/lib/chords/chord-parser";
 import { clearImportDraft, getImportDraft } from "@/lib/storage/import-draft";
 import { makeUserSongId } from "@/lib/storage/user-songs";
 import type { Song } from "@/types/song";
@@ -54,6 +55,18 @@ export default function AddSongScreen() {
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
   const border = useThemeColor({}, "icon");
+
+  function onParse() {
+    try {
+      const parsed = parseChordNotation(linesText);
+      const normalized = normalizeChordMarkup(parsed);
+      setLinesText(normalized.join("\n"));
+      Alert.alert("Parsed", "Chords have been parsed into the app format!");
+    } catch (e) {
+      console.warn(e);
+      Alert.alert("Parse Error", "Failed to parse chords. Please check the format.");
+    }
+  }
 
   async function onSave() {
     if (!valid) return;
@@ -174,7 +187,7 @@ export default function AddSongScreen() {
           </Field>
           <Field label="Lyrics + Chords">
             <TextInput
-              placeholder={`Type lines here. Use chord markup like [C]Hello [G]world\nOne line per row.`}
+              placeholder={`Paste chords/lyrics from anywhere!\nThen tap "Parse Chords" to convert.`}
               value={linesText}
               onChangeText={setLinesText}
               multiline
@@ -188,7 +201,22 @@ export default function AddSongScreen() {
             />
           </Field>
           <View style={{ height: 12 }} />
-          <Button title="Save" onPress={onSave} disabled={!valid || saving} loading={saving} />
+          <Stack direction="row" space={2}>
+            <Button
+              title="Parse Chords"
+              onPress={onParse}
+              disabled={!linesText.trim()}
+              variant="secondary"
+              style={{ flex: 1 }}
+            />
+            <Button
+              title="Save"
+              onPress={onSave}
+              disabled={!valid || saving}
+              loading={saving}
+              style={{ flex: 1 }}
+            />
+          </Stack>
         </ScrollView>
       </SafeAreaView>
     </ThemedView>

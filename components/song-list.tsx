@@ -10,9 +10,16 @@ export type SongListProps = {
   onPressItem?: (song: Song) => void;
   isFavorite?: (id: string) => boolean;
   onToggleFavorite?: (id: string, next: boolean) => void;
+  onDelete?: (song: Song) => void;
 };
 
-export function SongList({ songs, onPressItem, isFavorite, onToggleFavorite }: SongListProps) {
+export function SongList({
+  songs,
+  onPressItem,
+  isFavorite,
+  onToggleFavorite,
+  onDelete,
+}: SongListProps) {
   if (!songs || songs.length === 0) {
     return (
       <View style={{ padding: 16 }}>
@@ -32,6 +39,7 @@ export function SongList({ songs, onPressItem, isFavorite, onToggleFavorite }: S
           onPress={onPressItem}
           isFavorite={isFavorite?.(item.id)}
           onToggleFavorite={onToggleFavorite}
+          onDelete={onDelete}
         />
       )}
       contentContainerStyle={{ paddingVertical: 8, paddingBottom: 100 }}

@@ -17,6 +17,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function SongsScreen() {
   const router = useRouter();
   const [songs, setSongs] = useState<Song[]>([]);
+
+  const fetchSongs = React.useCallback(async () => {
+    const all = await getAllSongs();
+    setSongs(all);
+  }, []);
+
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -34,15 +40,8 @@ export default function SongsScreen() {
 
   useFocusEffect(
     React.useCallback(() => {
-      let mounted = true;
-      (async () => {
-        const all = await getAllSongs();
-        if (mounted) setSongs(all);
-      })();
-      return () => {
-        mounted = false;
-      };
-    }, [])
+      fetchSongs();
+    }, [fetchSongs])
   );
 
   const [mode, setMode] = useState<"all" | "artists">("all");
@@ -112,6 +111,7 @@ export default function SongsScreen() {
               onPressItem={song => router.push(`/song/${song.id}` as any)}
               isFavorite={id => fav.isFavorite(id)}
               onToggleFavorite={id => fav.toggleFavorite(id)}
+              onDelete={fetchSongs}
             />
           ) : (
             <ArtistsAccordion
